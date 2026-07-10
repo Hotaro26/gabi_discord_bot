@@ -1,11 +1,12 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from discord import app_commands
 import aiohttp
 from aiohttp import web
 import os
 from dotenv import load_dotenv
 import re
+import random
 
 load_dotenv()
 
@@ -14,6 +15,14 @@ COBALT_API_URL = os.getenv('COBALT_API_URL')
 
 intents = discord.Intents.default()
 intents.message_content = True
+
+STATUS_LIST = [
+    discord.Activity(type=discord.ActivityType.watching, name="waiting for you to give me media links"),
+    discord.Activity(type=discord.ActivityType.playing, name="hotaro is rrly great, go check out his github [Hotaro26]"),
+    discord.Activity(type=discord.ActivityType.playing, name="wih urls"),
+    discord.Activity(type=discord.ActivityType.watching, name="the source code of mine is available on hotaro's github!"),
+    discord.Activity(type=discord.ActivityType.listening, name="pls interact with me im so lonely")
+]
 
 class GabiBot(commands.Bot):
     def __init__(self):
@@ -24,6 +33,8 @@ class GabiBot(commands.Bot):
         await self.tree.sync()
         # Start dummy web server for hosting
         self.loop.create_task(self.web_server())
+        # Start the status shuffle loop
+        self.status_task.start()
 
     async def web_server(self):
         app = web.Application()
@@ -33,6 +44,17 @@ class GabiBot(commands.Bot):
         site = web.TCPSite(runner, '0.0.0.0', 7860)
         await site.start()
         print("✅ Dummy web server started on port 7860")
+
+    @tasks.loop(minutes=5)
+    async def status_task(self):
+        # Pick a random status from the list and apply it
+        await self.change_presence(activity=random.choice(STATUS_LIST))
+
+    @status_task.before_loop
+    async def before_status_task(self):
+        # Make sure the bot is fully ready before trying to set the status
+        await self.wait_until_ready()
+
 
 bot = GabiBot()
 URL_REGEX = r'(https?://[^\s]+)'
