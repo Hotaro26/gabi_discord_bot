@@ -12,6 +12,7 @@ load_dotenv()
 
 TOKEN = os.getenv('DISCORD_TOKEN')
 COBALT_API_URL = os.getenv('COBALT_API_URL')
+HF_TOKEN = os.getenv('HF_TOKEN')
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -101,6 +102,41 @@ async def supports(interaction: discord.Interaction):
         color=discord.Color.blue()
     )
     await interaction.response.send_message(embed=embed)
+
+@bot.tree.command(name="ask", description="Ask Gabi's AI brain a question!")
+async def ask(interaction: discord.Interaction, question: str):
+    await interaction.response.defer()
+    
+    if not HF_TOKEN:
+        await interaction.followup.send("❌ Error: HF_TOKEN is not set in the environment variables.")
+        return
+        
+    headers = {"Authorization": f"Bearer {HF_TOKEN}"}
+    # Using Mistral as it's very fast and responds well to this simple prompt format
+    payload = {"inputs": f"[INST] {question} [/INST]"}
+    api_url = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2"
+    
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(api_url, headers=headers, json=payload) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    ai_answer = data[0].get('generated_text', '')
+                    
+                    # Remove the prompt from the answer if the AI includes it
+                    prompt_text = f"[INST] {question} [/INST]"
+                    if ai_answer.startswith(prompt_text):
+                        ai_answer = ai_answer[len(prompt_text):].strip()
+                        
+                    # Discord limits messages to 2000 characters
+                    if len(ai_answer) > 2000:
+                        ai_answer = ai_answer[:1996] + "..."
+                        
+                    await interaction.followup.send(ai_answer)
+                else:
+                    await interaction.followup.send(f"❌ AI Error: HTTP {resp.status}")
+    except Exception as e:
+        await interaction.followup.send(f"❌ Error communicating with AI: {e}")
 
 @bot.tree.command(name="clear", description="Clear a specific number of messages from the chat")
 @app_commands.checks.has_permissions(manage_messages=True)
