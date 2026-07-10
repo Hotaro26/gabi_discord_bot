@@ -17,11 +17,11 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 STATUS_LIST = [
-    discord.Activity(type=discord.ActivityType.watching, name="waiting for you to give me media links"),
-    discord.Activity(type=discord.ActivityType.playing, name="hotaro is rrly great, go check out his github [Hotaro26]"),
-    discord.Activity(type=discord.ActivityType.playing, name="wih urls"),
-    discord.Activity(type=discord.ActivityType.watching, name="the source code of mine is available on hotaro's github!"),
-    discord.Activity(type=discord.ActivityType.listening, name="pls interact with me im so lonely")
+    discord.CustomActivity(name="waiting for you to give me media links"),
+    discord.CustomActivity(name="hotaro is rrly great, go check out his github [Hotaro26]"),
+    discord.CustomActivity(name="playing wih urls"),
+    discord.CustomActivity(name="the source code of mine is available on hotaro's github!"),
+    discord.CustomActivity(name="pls interact with me im so lonely")
 ]
 
 class GabiBot(commands.Bot):
