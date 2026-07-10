@@ -5,20 +5,16 @@ import os
 from dotenv import load_dotenv
 import re
 
-# Load environment variables from .env file
 load_dotenv()
 
 TOKEN = os.getenv('DISCORD_TOKEN')
-# E.g. https://your-space-name.hf.space/
 COBALT_API_URL = os.getenv('COBALT_API_URL')
 
-# Intents are required to read message content
 intents = discord.Intents.default()
 intents.message_content = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# Basic regex to find URLs in a message
 URL_REGEX = r'(https?://[^\s]+)'
 
 @bot.event
@@ -28,16 +24,13 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-    # Ignore messages sent by bots (including ourselves)
     if message.author.bot:
         return
 
-    # Look for a URL in the user's message
     match = re.search(URL_REGEX, message.content)
     if match:
         url = match.group(0)
         
-        # Show the bot is "typing..." while it waits for the Cobalt API
         async with message.channel.typing():
             try:
                 headers = {
@@ -49,12 +42,10 @@ async def on_message(message):
                 }
                 
                 async with aiohttp.ClientSession() as session:
-                    # Make a POST request to your Cobalt API
                     async with session.post(COBALT_API_URL, json=payload, headers=headers) as resp:
                         if resp.status == 200:
                             data = await resp.json()
                             
-                            # Cobalt typically returns status: 'redirect', 'stream', 'picker' or 'error'
                             if data.get('status') in ['redirect', 'stream']:
                                 stream_url = data.get('url')
                                 await message.reply(f"Here is your direct stream link: {stream_url}")
@@ -66,7 +57,6 @@ async def on_message(message):
             except Exception as e:
                 print(f"Error processing link: {e}")
 
-    # Ensure other commands still work
     await bot.process_commands(message)
 
 if __name__ == '__main__':
