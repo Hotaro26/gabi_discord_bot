@@ -105,14 +105,11 @@ async def on_message(message):
                                 
                                 # Create a clickable UI Button
                                 view = discord.ui.View()
-                                button = discord.ui.Button(label="📥 Download / Open Media", url=stream_url, style=discord.ButtonStyle.link)
+                                button = discord.ui.Button(label="📥 Download", url=stream_url, style=discord.ButtonStyle.link)
                                 view.add_item(button)
                                 
-                                # Hide the massive URL using Discord Markdown link formatting!
-                                # Discord will still auto-generate the video player because it sees a URL.
-                                content = f"[🎬 Media Ready!]({stream_url})"
-                                
-                                await message.reply(content=content, view=view)
+                                # Send the raw URL so Discord auto-generates the video player
+                                await message.reply(content=stream_url, view=view)
                             else:
                                 print(f"Cobalt response: {data}")
                         else:
