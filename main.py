@@ -114,7 +114,9 @@ async def ask(interaction: discord.Interaction, question: str):
     headers = {"Authorization": f"Bearer {HF_TOKEN}"}
     # Using Mistral as it's very fast and responds well to this simple prompt format
     payload = {"inputs": f"[INST] {question} [/INST]"}
-    api_url = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2"
+    
+    # Use router.huggingface.co to bypass DNS blocks some servers have for api-inference
+    api_url = "https://router.huggingface.co/hf-inference/models/mistralai/Mistral-7B-Instruct-v0.2"
     
     try:
         async with aiohttp.ClientSession() as session:
