@@ -102,6 +102,19 @@ async def supports(interaction: discord.Interaction):
     )
     await interaction.response.send_message(embed=embed)
 
+@bot.tree.command(name="clear", description="Clear a specific number of messages from the chat")
+@app_commands.checks.has_permissions(manage_messages=True)
+async def clear(interaction: discord.Interaction, amount: int):
+    # Acknowledge the interaction privately first since purging takes time
+    await interaction.response.defer(ephemeral=True)
+    deleted = await interaction.channel.purge(limit=amount)
+    await interaction.followup.send(f"✅ Successfully cleared {len(deleted)} messages!", ephemeral=True)
+
+@clear.error
+async def clear_error(interaction: discord.Interaction, error: app_commands.AppCommandError):
+    if isinstance(error, app_commands.MissingPermissions):
+        await interaction.response.send_message("❌ You need 'Manage Messages' permissions to use this!", ephemeral=True)
+
 @bot.event
 async def on_message(message):
     if message.author.bot:
