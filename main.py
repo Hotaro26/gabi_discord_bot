@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import aiohttp
+from aiohttp import web
 import os
 from dotenv import load_dotenv
 import re
@@ -16,6 +17,20 @@ intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 URL_REGEX = r'(https?://[^\s]+)'
+
+# --- Dummy Web Server to keep Hugging Face awake ---
+async def web_server():
+    app = web.Application()
+    app.router.add_get('/', lambda request: web.Response(text="Gabi is running!"))
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', 7860) # HF uses port 7860
+    await site.start()
+    print("✅ Dummy web server started on port 7860")
+
+@bot.event
+async def setup_hook():
+    bot.loop.create_task(web_server())
 
 @bot.event
 async def on_ready():
