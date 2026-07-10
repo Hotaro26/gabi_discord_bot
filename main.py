@@ -77,7 +77,11 @@ async def about(interaction: discord.Interaction):
     if bot.user.avatar:
         embed.set_thumbnail(url=bot.user.avatar.url)
         
-    await interaction.response.send_message(embed=embed)
+    view = discord.ui.View()
+    view.add_item(discord.ui.Button(label="💻 Hotaro's GitHub", url="https://github.com/Hotaro26", style=discord.ButtonStyle.link))
+    view.add_item(discord.ui.Button(label="🤖 Bot Code", url="https://github.com/Hotaro26/gabi_discord_bot", style=discord.ButtonStyle.link))
+        
+    await interaction.response.send_message(embed=embed, view=view)
 
 @bot.tree.command(name="supports", description="See which platforms Gabi can download from")
 async def supports(interaction: discord.Interaction):
@@ -135,8 +139,6 @@ async def on_message(message):
                                 # Create clickable UI Buttons
                                 view = discord.ui.View()
                                 view.add_item(discord.ui.Button(label="📥 Download", url=stream_url, style=discord.ButtonStyle.link))
-                                view.add_item(discord.ui.Button(label="💻 Hotaro's GitHub", url="https://github.com/Hotaro26", style=discord.ButtonStyle.link))
-                                view.add_item(discord.ui.Button(label="🤖 Bot Code", url="https://github.com/Hotaro26/gabi_discord_bot", style=discord.ButtonStyle.link))
                                 
                                 # Send the raw URL (for video player) + our custom embed + buttons
                                 await message.reply(content=stream_url, embed=embed, view=view)
