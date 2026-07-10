@@ -125,13 +125,21 @@ async def on_message(message):
                             if data.get('status') in ['redirect', 'stream']:
                                 stream_url = data.get('url')
                                 
-                                # Create a clickable UI Button
+                                # Create a colorful embed
+                                embed = discord.Embed(
+                                    title="🌸 Media Ready!",
+                                    description="Here is your requested media! Enjoy!",
+                                    color=discord.Color.pink()
+                                )
+
+                                # Create clickable UI Buttons
                                 view = discord.ui.View()
-                                button = discord.ui.Button(label="📥 Download", url=stream_url, style=discord.ButtonStyle.link)
-                                view.add_item(button)
+                                view.add_item(discord.ui.Button(label="📥 Download", url=stream_url, style=discord.ButtonStyle.link))
+                                view.add_item(discord.ui.Button(label="💻 Hotaro's GitHub", url="https://github.com/Hotaro26", style=discord.ButtonStyle.link))
+                                view.add_item(discord.ui.Button(label="🤖 Bot Code", url="https://github.com/Hotaro26/gabi_discord_bot", style=discord.ButtonStyle.link))
                                 
-                                # Send the raw URL so Discord auto-generates the video player
-                                await message.reply(content=stream_url, view=view)
+                                # Send the raw URL (for video player) + our custom embed + buttons
+                                await message.reply(content=stream_url, embed=embed, view=view)
                             else:
                                 print(f"Cobalt response: {data}")
                         else:
